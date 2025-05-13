@@ -1,0 +1,21 @@
+
+
+
+## 1. AWS Serverless Application Model (AWS SAM)
+* [Install](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+
+```
+$sam --version
+SAM CLI, version 1.138.0
+```
+
+## 2. Initial Java-based Lambda function
+```
+$sam init --runtime java11 --dependency-manager maven --app-template hello-world --name sqs-lambda-test
+
+$cd sqs-lambda-test
+```
+
+## 3. Testing with [LocalStack](https://www.localstack.cloud/)
+* [LocalStack module in TestContainers](https://java.testcontainers.org/modules/localstack/)
+
