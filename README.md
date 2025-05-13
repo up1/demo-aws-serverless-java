@@ -1,4 +1,4 @@
-# Demo AWS Serverless + SQS + LocalStacl
+# Demo AWS Serverless + SQS + LocalStack
 
 ## 1. AWS Serverless Application Model (AWS SAM)
 * [Install](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
