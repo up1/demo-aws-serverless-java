@@ -1,18 +1,16 @@
 package helloworld;
-import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 
-import software.amazon.awssdk.services.sqs.model.Message;
-
-public class SQSLambdaHandler implements RequestHandler<List<Message>, String> {
+public class SQSLambdaHandler implements RequestHandler<SQSEvent, String> {
 
     @Override
-    public String handleRequest(List<Message> messages, Context context) {
-        for (Message msg : messages) {
-            System.out.println("Received SQS Message: " + msg.body());
+    public String handleRequest(SQSEvent event, Context context) {
+        for (SQSEvent.SQSMessage msg : event.getRecords()) {
+            System.out.println("Lambda received: " + msg.getBody());
         }
-        return "Processed " + messages.size() + " messages.";
+        return "Processed " + event.getRecords().size() + " messages.";
     }
 }

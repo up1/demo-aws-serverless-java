@@ -1,6 +1,9 @@
 package helloworld;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -9,23 +12,24 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SQSLambdaHandlerTest {
 
-    private static final DockerImageName localstackImage = DockerImageName.parse("localstack/localstack:latest");
+    private static final DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse("localstack/localstack:latest");
 
-    private static final LocalStackContainer localstack = new LocalStackContainer(localstackImage)
+    private final LocalStackContainer localstack = new LocalStackContainer(LOCALSTACK_IMAGE)
             .withServices(LocalStackContainer.Service.SQS);
 
     private SqsClient sqsClient;
     private String queueUrl;
 
     @BeforeAll
-    void setUp() {
+    void setup() {
         localstack.start();
 
         sqsClient = SqsClient.builder()
@@ -35,43 +39,51 @@ public class SQSLambdaHandlerTest {
                 .region(Region.of(localstack.getRegion()))
                 .build();
 
-        CreateQueueResponse createQueueResponse = sqsClient.createQueue(CreateQueueRequest.builder()
+        CreateQueueRequest createQueueRequest = CreateQueueRequest.builder()
                 .queueName("test-queue")
-                .build());
+                .build();
 
+        CreateQueueResponse createQueueResponse = sqsClient.createQueue(createQueueRequest);
         queueUrl = createQueueResponse.queueUrl();
     }
 
     @Test
-    void testSendAndReceiveMessage() {
-        // Send message
+    void testLambdaHandlerWithLocalStackSQS() {
+        // Send a real message into LocalStack's SQS
         sqsClient.sendMessage(SendMessageRequest.builder()
                 .queueUrl(queueUrl)
-                .messageBody("{\"name\":\"John Doe\",\"email\":\"john@example.com\"}")
+                .messageBody("{\"name\":\"Alice\",\"email\":\"alice@example.com\"}")
                 .build());
 
-        // Receive message
-        ReceiveMessageResponse response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+        // Receive the message from the queue
+        ReceiveMessageResponse received = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .maxNumberOfMessages(1)
+                .waitTimeSeconds(1)
                 .build());
 
-        List<Message> messages = response.messages();
-        assertFalse(messages.isEmpty());
-        System.out.println("Received message: " + response.messages().get(0).body());
+        List<Message> awsMessages = received.messages();
+        Assertions.assertFalse(awsMessages.isEmpty());
 
+        // Convert AWS SDK message to SQSEvent.SQSMessage
+        SQSEvent.SQSMessage lambdaMessage = new SQSEvent.SQSMessage();
+        lambdaMessage.setBody(awsMessages.get(0).body());
 
-        // Simulate Lambda Handler Execution
+        SQSEvent lambdaEvent = new SQSEvent();
+        lambdaEvent.setRecords(Collections.singletonList(lambdaMessage));
+
+        // Call Lambda Handler
         SQSLambdaHandler handler = new SQSLambdaHandler();
-        String result = handler.handleRequest(messages, null); // Context can be null for testing
+        Context mockContext = Mockito.mock(Context.class);
+        String result = handler.handleRequest(lambdaEvent, mockContext);
 
-        Assertions.assertEquals("Processed 1 messages.", result);
-        System.out.println("Lambda result: " + result);
+        assertEquals("Processed 1 messages.", result);
+        System.out.println("Lambda Handler result: " + result);
     }
 
     @AfterAll
-    void tearDown() {
-        sqsClient.close();
+    void cleanup() {
+        if (sqsClient != null) sqsClient.close();
         localstack.stop();
     }
 }
