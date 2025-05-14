@@ -33,8 +33,9 @@ Fix bug of docker on MacOS
 $sudo ln -sf "$HOME/.docker/run/docker.sock" /var/run/docker.sock
 ```
 
-## 4. Testing with [LocalStack](https://www.localstack.cloud/)
+## 4. Testing
 * Integration or Component testing
+  * [LocalStack](https://www.localstack.cloud/)
   * [LocalStack module in TestContainers](https://java.testcontainers.org/modules/localstack/)
 * Unit test
   * JUnit + Mockito
