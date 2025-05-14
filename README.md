@@ -12,11 +12,13 @@ SAM CLI, version 1.138.0
 ```
 $sam init --runtime java11 --dependency-manager maven --app-template hello-world --name sqs-lambda-test
 
-$cd sqs-lambda-test
 
+# Build JAR file
+$cd sqs-lambda-test
 $mvn clean package
 
 # Add JAR file to CLASSPATH
+$export CLASSPATH=.:path to jar file:$CLASSPATH
 ```
 
 ## 3. Run local with SAM
