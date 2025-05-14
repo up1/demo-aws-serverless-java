@@ -25,6 +25,12 @@ $mvn clean package
 $sam local invoke SQSLambdaFunction --event events/sqs-event.json
 ```
 
+Fix bug of docker on MacOS
+* https://github.com/aws/aws-sam-cli/issues/5059
+```
+$sudo ln -sf "$HOME/.docker/run/docker.sock" /var/run/docker.sock
+```
+
 ## 4. Testing with [LocalStack](https://www.localstack.cloud/)
 * Integration or Component testing
   * [LocalStack module in TestContainers](https://java.testcontainers.org/modules/localstack/)
