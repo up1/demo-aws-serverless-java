@@ -2,6 +2,7 @@
 
 ## 1. AWS Serverless Application Model (AWS SAM)
 * [Install](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+* [Setup IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-keys_inline-policy.html)
 
 ```
 $sam --version
