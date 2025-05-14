@@ -26,7 +26,11 @@ $sam local invoke SQSLambdaFunction --event events/sqs-event.json
 ```
 
 ## 4. Testing with [LocalStack](https://www.localstack.cloud/)
-* [LocalStack module in TestContainers](https://java.testcontainers.org/modules/localstack/)
+* Integration or Component testing
+  * [LocalStack module in TestContainers](https://java.testcontainers.org/modules/localstack/)
+* Unit test
+  * JUnit + Mockito
+    
 ```
 $mvn clean test
 ```
